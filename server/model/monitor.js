@@ -159,6 +159,7 @@ class Monitor extends BeanModel {
             kafkaProducerAllowAutoTopicCreation: this.getKafkaProducerAllowAutoTopicCreation(),
             kafkaProducerMessage: this.kafkaProducerMessage,
             screenshot,
+            cacheBust: this.getCacheBust(),
             remote_browser: this.remote_browser,
             snmpOid: this.snmpOid,
             jsonPathOperator: this.jsonPathOperator,
@@ -296,6 +297,14 @@ class Monitor extends BeanModel {
     }
 
     /**
+     * Parse to boolean
+     * @returns {boolean} if cachebusting is enabled
+     */
+    getCacheBust() {
+        return Boolean(this.cacheBust);
+    }
+
+    /**
      * Get accepted status codes
      * @returns {object} Accepted status codes
      */
@@ -336,7 +345,7 @@ class Monitor extends BeanModel {
         let previousBeat = null;
         let retries = 0;
 
-        this.prometheus = new Prometheus(this);
+        this.prometheus = await Prometheus.createAndInitMetrics(this);
 
         const beat = async () => {
 
@@ -498,6 +507,14 @@ class Monitor extends BeanModel {
 
                     if (bodyValue) {
                         options.data = bodyValue;
+                    }
+
+                    if (this.cacheBust) {
+                        const randomFloatString = Math.random().toString(36);
+                        const cacheBust = randomFloatString.substring(2);
+                        options.params = {
+                            uptime_kuma_cachebuster: cacheBust,
+                        };
                     }
 
                     if (this.proxy_id) {
@@ -980,7 +997,7 @@ class Monitor extends BeanModel {
             await R.store(bean);
 
             log.debug("monitor", `[${this.name}] prometheus.update`);
-            this.prometheus?.update(bean, tlsInfo);
+            await this.prometheus?.update(bean, tlsInfo);
 
             previousBeat = bean;
 
