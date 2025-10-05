@@ -132,6 +132,7 @@ export default {
                 "lunasea": "LunaSea",
                 "matrix": "Matrix",
                 "mattermost": "Mattermost",
+                "nextcloudtalk": "Nextcloud Talk",
                 "nostr": "Nostr",
                 "ntfy": "Ntfy",
                 "octopush": "Octopush",
@@ -170,6 +171,7 @@ export default {
                 "gtxmessaging": "GtxMessaging",
                 "Cellsynt": "Cellsynt",
                 "SendGrid": "SendGrid",
+                "Brevo": "Brevo",
                 "notifery": "Notifery"
             };
 

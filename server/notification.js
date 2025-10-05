@@ -28,6 +28,7 @@ const LineNotify = require("./notification-providers/linenotify");
 const LunaSea = require("./notification-providers/lunasea");
 const Matrix = require("./notification-providers/matrix");
 const Mattermost = require("./notification-providers/mattermost");
+const NextcloudTalk = require("./notification-providers/nextcloudtalk");
 const Nostr = require("./notification-providers/nostr");
 const Ntfy = require("./notification-providers/ntfy");
 const Octopush = require("./notification-providers/octopush");
@@ -75,6 +76,7 @@ const Cellsynt = require("./notification-providers/cellsynt");
 const Onesender = require("./notification-providers/onesender");
 const Wpush = require("./notification-providers/wpush");
 const SendGrid = require("./notification-providers/send-grid");
+const Brevo = require("./notification-providers/brevo");
 const YZJ = require("./notification-providers/yzj");
 const SMSPlanet = require("./notification-providers/sms-planet");
 const SpugPush = require("./notification-providers/spugpush");
@@ -122,6 +124,7 @@ class Notification {
             new LunaSea(),
             new Matrix(),
             new Mattermost(),
+            new NextcloudTalk(),
             new Nostr(),
             new Ntfy(),
             new Octopush(),
@@ -169,6 +172,7 @@ class Notification {
             new Cellsynt(),
             new Wpush(),
             new SendGrid(),
+            new Brevo(),
             new YZJ(),
             new SMSPlanet(),
             new SpugPush(),
