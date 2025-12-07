@@ -11,8 +11,6 @@ const iconv = require("iconv-lite");
 const chardet = require("chardet");
 const chroma = require("chroma-js");
 const mssql = require("mssql");
-const { Client } = require("pg");
-const postgresConParse = require("pg-connection-string").parse;
 const mysql = require("mysql2");
 const { NtlmClient } = require("./modules/axios-ntlm/lib/ntlmClient.js");
 const { Settings } = require("./settings");
@@ -350,64 +348,6 @@ exports.mssqlQuery = async function (connectionString, query) {
 };
 
 /**
- * Run a query on Postgres
- * @param {string} connectionString The database connection string
- * @param {string} query The query to validate the database with
- * @returns {Promise<(string[] | object[] | object)>} Response from
- * server
- */
-exports.postgresQuery = function (connectionString, query) {
-    return new Promise((resolve, reject) => {
-        const config = postgresConParse(connectionString);
-
-        // Fix #3868, which true/false is not parsed to boolean
-        if (typeof config.ssl === "string") {
-            config.ssl = config.ssl === "true";
-        }
-
-        if (config.password === "") {
-            // See https://github.com/brianc/node-postgres/issues/1927
-            reject(new Error("Password is undefined."));
-            return;
-        }
-        const client = new Client(config);
-
-        client.on("error", (error) => {
-            log.debug("postgres", "Error caught in the error event handler.");
-            reject(error);
-        });
-
-        client.connect((err) => {
-            if (err) {
-                reject(err);
-                client.end();
-            } else {
-                // Connected here
-                try {
-                    // No query provided by user, use SELECT 1
-                    if (!query || (typeof query === "string" && query.trim() === "")) {
-                        query = "SELECT 1";
-                    }
-
-                    client.query(query, (err, res) => {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            resolve(res);
-                        }
-                        client.end();
-                    });
-                } catch (e) {
-                    reject(e);
-                    client.end();
-                }
-            }
-        });
-
-    });
-};
-
-/**
  * Run a query on MySQL/MariaDB
  * @param {string} connectionString The database connection string
  * @param {string} query The query to validate the database with
@@ -634,6 +574,30 @@ exports.checkCertificate = function (socket) {
         valid: valid,
         certInfo: parsedInfo
     };
+};
+
+/**
+ * Checks if the certificate is valid for the provided hostname.
+ * Defaults to true if feature `X509Certificate` is not available, or input is not valid.
+ * @param {Buffer} certBuffer - The certificate buffer.
+ * @param {string} hostname - The hostname to compare against.
+ * @returns {boolean} True if the certificate is valid for the provided hostname, false otherwise.
+ */
+exports.checkCertificateHostname = function (certBuffer, hostname) {
+    let X509Certificate;
+    try {
+        X509Certificate = require("node:crypto").X509Certificate;
+    } catch (_) {
+        // X509Certificate is not available in this version of Node.js
+        return true;
+    }
+
+    if (!X509Certificate || !certBuffer || !hostname) {
+        return true;
+    }
+
+    let certObject = new X509Certificate(certBuffer);
+    return certObject.checkHost(hostname) !== undefined;
 };
 
 /**
