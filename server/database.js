@@ -263,6 +263,24 @@ class Database {
             const Dialect = require("knex/lib/dialects/sqlite3/index.js");
             Dialect.prototype._driver = () => require("@louislam/sqlite3");
 
+            // SQLite is actually multiple connections for WAL mode, so we can set it to a higher number.
+            // See: https://github.com/knex/knex/issues/3176#issuecomment-3389054899
+            let poolConfig = {
+                min: 0,
+                max: 20,
+            };
+
+            // However, for unknown reason, it is not working probably on Raspberry Pi, it causes "SQLITE_BUSY: database is locked" error.
+            // See: https://github.com/louislam/uptime-kuma/issues/7289
+            // Provide an environment variable to switch back to a single connection.
+            if (process.env.UPTIME_KUMA_SQLITE_SINGLE_CONNECTION === "true") {
+                log.info("db", "Using single connection for SQLite");
+                poolConfig = {
+                    min: 1,
+                    max: 1,
+                };
+            }
+
             config = {
                 client: Dialect,
                 connection: {
@@ -271,10 +289,7 @@ class Database {
                 },
                 useNullAsDefault: true,
                 pool: {
-                    // SQLite is actually multiple connections for WAL mode, so we can set it to a higher number.
-                    // See: https://github.com/knex/knex/issues/3176#issuecomment-3389054899
-                    min: 0,
-                    max: 20,
+                    ...poolConfig,
                     acquireTimeoutMillis: acquireConnectionTimeout,
                     afterCreate: (rawConn, done) => {
                         this.initSQLite(rawConn, testMode)
@@ -419,6 +434,9 @@ class Database {
         await asyncRun("PRAGMA foreign_keys = ON");
         await asyncRun("PRAGMA cache_size = -12000");
         await asyncRun("PRAGMA auto_vacuum = INCREMENTAL");
+
+        // Avoid error "SQLITE_BUSY: database is locked" by allowing SQLITE to wait up to 5 seconds to do a write
+        await asyncRun("PRAGMA busy_timeout = 5000");
 
         // This ensures that an operating system crash or power failure will not corrupt the database.
         // FULL synchronous is very safe, but it is also slower.
