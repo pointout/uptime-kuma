@@ -6,7 +6,9 @@ const AliyunSms = require("./notification-providers/aliyun-sms");
 const Apprise = require("./notification-providers/apprise");
 const Bale = require("./notification-providers/bale");
 const Bark = require("./notification-providers/bark");
+const BearSMS = require("./notification-providers/bearsms");
 const Bitrix24 = require("./notification-providers/bitrix24");
+const ClickUp = require("./notification-providers/clickup");
 const ClickSendSMS = require("./notification-providers/clicksendsms");
 const CallMeBot = require("./notification-providers/call-me-bot");
 const SMSC = require("./notification-providers/smsc");
@@ -81,12 +83,14 @@ const SevenIO = require("./notification-providers/sevenio");
 const Whapi = require("./notification-providers/whapi");
 const WAHA = require("./notification-providers/waha");
 const Evolution = require("./notification-providers/evolution");
+const OpenWa = require("./notification-providers/openwa");
 const GtxMessaging = require("./notification-providers/gtx-messaging");
 const Cellsynt = require("./notification-providers/cellsynt");
 const Onesender = require("./notification-providers/onesender");
 const Wpush = require("./notification-providers/wpush");
 const WxPusher = require("./notification-providers/wxpusher");
 const SendGrid = require("./notification-providers/send-grid");
+const TurboSMTP = require("./notification-providers/turbosmtp");
 const Brevo = require("./notification-providers/brevo");
 const Resend = require("./notification-providers/resend");
 const YZJ = require("./notification-providers/yzj");
@@ -122,7 +126,9 @@ class Notification {
             new Apprise(),
             new Bale(),
             new Bark(),
+            new BearSMS(),
             new Bitrix24(),
+            new ClickUp(),
             new ClickSendSMS(),
             new CallMeBot(),
             new SMSC(),
@@ -197,6 +203,7 @@ class Notification {
             new Whapi(),
             new WAHA(),
             new Evolution(),
+            new OpenWa(),
             new GtxMessaging(),
             new Cellsynt(),
             new Wpush(),
@@ -209,6 +216,7 @@ class Notification {
             new Notifery(),
             new SMSIR(),
             new SendGrid(),
+            new TurboSMTP(),
             new Whatsapp360messenger(),
             new Webpush(),
             new HaloPSA(),
